@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="pyjobs">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" />
+    <link rel="stylesheet" href="/static/css/app.css" />
+</head>
+<body ng-controller="pyjobsMain">
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Python Jobs</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <form class="navbar-form navbar-right">
+                <input type="text" class="form-control" placeholder="Pesquisar por..." />
+                <div class="btn-group">
+                    <button type="button" class="btn"
+                            ng-disabled="status == 1"
+                            ng-class="{'btn-danger': status==0, 'btn-success': status==1}">
+                        <span class="badge" ng-bind="status ? 'connected' : 'disconnected'"></span>
+                    </button>
+
+                    <button type="button" class="btn dropdown-toggle"
+                            ng-disabled="status == 0"
+                            ng-class="{'btn-danger': status==0, 'btn-success': status==1}"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Recarregar</a></li>
+                    </ul>
+                </div>
+
+                <div class="btn-group">
+
+                </div>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container" style="margin-top:55px">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="list-group">
+                <button type="button" class="list-group-item">Cras justo odio</button>
+                <button type="button" class="list-group-item">Dapibus ac facilisis in</button>
+                <button type="button" class="list-group-item">Morbi leo risus</button>
+                <button type="button" class="list-group-item">Porta ac consectetur ac</button>
+                <button type="button" class="list-group-item">Vestibulum at eros</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/static/js/angularjs/angular.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/js/underscore-min.js"></script>
+<script type="text/javascript" src="/static/js/app.js"></script>
+</body>
+</html>

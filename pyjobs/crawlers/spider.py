@@ -33,7 +33,7 @@ class BaseSpider(object):
         try:
             response = yield self.http.fetch(url)
             logger.info('got response %s' % url)
-            message['json'] = self.parse_response(response)
+            message['data'] = self.parse_response(response)
             message['status'] = 'success'
         except (httpclient.HTTPError, ValueError):
             message['message'] = 'http error'

@@ -21,7 +21,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <form class="navbar-form navbar-right">
-                <input type="text" class="form-control" placeholder="Pesquisar por..." />
+                <input type="text" class="form-control" placeholder="Pesquisar por..."
+                       ng-model="text" />
                 <div class="btn-group">
                     <button type="button" class="btn"
                             ng-disabled="status == 1"
@@ -52,13 +53,37 @@
 <div class="container" style="margin-top:55px">
     <div class="row">
         <div class="col-md-12">
-            <div class="list-group">
-                <button type="button" class="list-group-item">Cras justo odio</button>
-                <button type="button" class="list-group-item">Dapibus ac facilisis in</button>
-                <button type="button" class="list-group-item">Morbi leo risus</button>
-                <button type="button" class="list-group-item">Porta ac consectetur ac</button>
-                <button type="button" class="list-group-item">Vestibulum at eros</button>
-            </div>
+            <ul class="list-group">
+                <li class="list-group-item" ng-repeat="job in jobs | filter: text">
+                    <div class="row">
+                        <h3 class="col-md-9">
+                            <a href="{{!job.url}}" target="_blank" ng-bind="job.title"></a>
+                        </h3>
+                        <span class="col-md-3" ng-bind="job.location"></span>
+                    </div>
+                    <div class="row">
+                        <h6 class="col-md-9">
+                            <div class="row">
+                                <span class="col-md-2">
+                                    <i class="glyphicon glyphicon-calendar" title="Data de publicação"></i>
+                                    <span ng-bind="job.date | date"></span>
+                                </span>
+                                <span class="col-md-3">
+                                    <i class="glyphicon glyphicon-book" title="Empresa"></i>
+                                    <span ng-bind="job.company"></span>
+                                </span>
+                                <span class="col-md-5" ng-if="job.tags.length">
+                                    <i class="glyphicon glyphicon-tags"></i>
+                                    <span ng-bind="job.tags"></span>
+                                </span>
+                            </div>
+                        </h6>
+                        <div class="col-md-3">
+                            <span ng-bind="job.category"></span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </div>

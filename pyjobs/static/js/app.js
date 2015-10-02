@@ -9,6 +9,7 @@
 
     .controller('pyjobsMain', ['$scope', '$timeout', '$websocket',
     function($scope, $timeout, $websocket){
+        $scope.jobs = [];
         $scope.status = 0;
 
         var ws = $websocket();
@@ -28,7 +29,12 @@
         }
 
         ws.onmessage = function(message){
-            console.debug('Message: ', message.data);
+            var response = angular.fromJson(message.data);
+            $timeout(function(){
+                $scope.jobs = $scope.jobs.concat(response.data);
+                console.debug(response.data);
+            }, 0);
+//            console.debug('Message: ', message.data);
         };
 
         $scope.sendMessage = function(message){
@@ -36,6 +42,5 @@
             ws.send(message);
         }
 
-        $scope.jobs = [];
     }]);
 })();

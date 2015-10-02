@@ -3,7 +3,7 @@ from pyjobs.crawlers.spider import BaseSpider
 
 
 class PyORGCrawlwer(BaseSpider):
-    URL = 'https://www.python.org/joddslkjf'
+    URL = 'https://www.python.org/jobs'
     # URL = 'FLAKSDJFLASJD'
 
     def parse_response(self, response):
@@ -34,6 +34,8 @@ class PyORGCrawlwer(BaseSpider):
                 'tags': tags,
                 'category': category,
                 'date': date,
+                'origin': 'python.org',
+                'url': self.URL,
             })
 
         return data

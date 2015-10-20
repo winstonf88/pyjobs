@@ -11,40 +11,18 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Python Jobs</a>
+            <a class="navbar-brand" href="#">
+                Python Jobs
+            </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <form class="navbar-form navbar-right">
+                <span class="label" btn-con-status="status">
+                    <span ng-bind="status | conStatus"></span>
+                    <span ng-bind="(jobs|filter:text).length+'/'+jobs.length"></span>
+                </span>
                 <input type="text" class="form-control" placeholder="Pesquisar por..."
                        ng-model="text" />
-                <div class="btn-group">
-                    <button type="button" class="btn"
-                            ng-disabled="status == 1"
-                            ng-class="{'btn-danger': status==0, 'btn-success': status==1}">
-                        <span class="badge" ng-bind="status ? 'connected' : 'disconnected'"></span>
-                    </button>
-
-                    <button type="button" class="btn dropdown-toggle"
-                            ng-disabled="status == 0"
-                            ng-class="{'btn-danger': status==0, 'btn-success': status==1}"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#">Recarregar</a></li>
-                    </ul>
-                </div>
-
-                <div class="btn-group">
-
-                </div>
             </form>
         </div>
     </div>
@@ -58,22 +36,25 @@
                     <div class="row">
                         <h3 class="col-md-9">
                             <a href="{{!job.url}}" target="_blank" ng-bind="job.title"></a>
+                             <small ng-bind="job.origin"></small>
                         </h3>
                         <span class="col-md-3" ng-bind="job.location"></span>
                     </div>
                     <div class="row">
                         <h6 class="col-md-9">
                             <div class="row">
-                                <span class="col-md-2">
+                                <p class="col-md-2">
                                     <i class="glyphicon glyphicon-calendar" title="Data de publicação"></i>
                                     <span ng-bind="job.date | date"></span>
-                                </span>
-                                <span class="col-md-3">
+                                </p>
+                                <p class="col-md-8">
                                     <i class="glyphicon glyphicon-book" title="Empresa"></i>
                                     <span ng-bind="job.company"></span>
-                                </span>
-                                <span class="col-md-5" ng-if="job.tags.length">
-                                    <i class="glyphicon glyphicon-tags"></i>
+                                </p>
+                            </div>
+                            <div class="row">
+                                <span class="col-md-12" ng-if="job.tags.length">
+                                    <i class="glyphicon glyphicon-tags" title="Tags"></i>
                                     <span ng-bind="job.tags"></span>
                                 </span>
                             </div>

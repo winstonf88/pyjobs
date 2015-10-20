@@ -1,29 +1,43 @@
-from bs4 import BeautifulSoup
+from tornado import gen
 from pyjobs.crawlers.spider import BaseSpider
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class PyORGCrawlwer(BaseSpider):
     URL = 'https://www.python.org/jobs'
-    # URL = 'FLAKSDJFLASJD'
 
-    def parse_response(self, response):
-        soup = BeautifulSoup(response.body)
+    @gen.coroutine
+    def fetch_links(self, response, soup):
+        urls = []
+        if '?page' not in response.effective_url:
+            pagination = soup.find('ul', {'class': 'pagination menu'})
+            pages = pagination.findAll('a')[1:-1]
+            for page in pages:
+                url = '%s%s' % (self.URL, page.attrs['href'])
+                urls.append(url)
+        raise gen.Return(urls)
+
+    @gen.coroutine
+    def parse_response(self, response, soup):
         jobs = soup.find('ol', {'class': 'list-recent-jobs'})
         data = []
-        # import ipdb; ipdb.set_trace()
 
         for node in jobs.findAll('li'):
             title = node.find('span', {'class': 'listing-company-name'})
-            title = title.text.split()
-            company = title[-1]
-            title = ' '.join(title[:-1])
+            url = '%s%s' % (self.domain, title.find('a').attrs['href'])
+            title = title.text.split('\t')
+            company = ' '.join(title[1:]).strip()
+            title = title[0].strip()
+
             location = node.find('span', {'class': 'listing-location'}).text
             category = node.find('span', {'class': 'listing-company-category'}).text
             date = node.find('time').attrs['datetime']
-            tags = node.find('span', {'class': 'listing-node-type'})
+            tags = node.find('span', {'class': 'listing-job-type'})
             if tags:
-                tags = tags.findAll('a')
-                tags = [tag.text for tag in tags]
+                tags = [tag.text for tag in tags.findAll('a')]
             else:
                 tags = []
 
@@ -35,7 +49,7 @@ class PyORGCrawlwer(BaseSpider):
                 'category': category,
                 'date': date,
                 'origin': 'python.org',
-                'url': self.URL,
+                'url': url,
             })
 
-        return data
+        raise gen.Return(data)

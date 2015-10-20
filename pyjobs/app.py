@@ -27,3 +27,6 @@ def server():
     application = web.Application(url_patterns, **settings)
     application.listen(8888)
     ioloop.IOLoop.current().start()
+
+if __name__ == '__main__':
+    server()

@@ -17,7 +17,6 @@ class WebSocketHandler(websocket.WebSocketHandler):
     @gen.coroutine
     def on_message(self, message):
         cmd = json.loads(message)
-
         if cmd['cmd'] == 'search':
             logger.info('cmd: search')
             yield crawl_jobs(self)
@@ -25,6 +24,9 @@ class WebSocketHandler(websocket.WebSocketHandler):
     def on_close(self):
         logger.info('close connection')
 
+    def write_message(self, message, binary=False):
+        data = json.dumps(message)
+        return super(WebSocketHandler, self).write_message(data, binary)
 
 class HomeHandler(web.RequestHandler):
 

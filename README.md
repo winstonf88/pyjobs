@@ -1,5 +1,10 @@
-# pyjobs
+# PYJOBS
 
+Install Requires
+----------------
+- Python >= 3.4
+- Beautifulsoup4
+- tornado
 
 Install
 -------

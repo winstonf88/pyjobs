@@ -6,11 +6,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class PyORGCrawlwer(BaseSpider):
+class PyORGCrawler(BaseSpider):
     URL = 'https://www.python.org/jobs'
 
     @gen.coroutine
     def fetch_links(self, response, soup):
+        """Fetch next pages."""
         urls = []
         if '?page' not in response.effective_url:
             pagination = soup.find('ul', {'class': 'pagination menu'})
@@ -22,6 +23,7 @@ class PyORGCrawlwer(BaseSpider):
 
     @gen.coroutine
     def parse_response(self, response, soup):
+        """Extract job info from response."""
         jobs = soup.find('ol', {'class': 'list-recent-jobs'})
         data = []
 

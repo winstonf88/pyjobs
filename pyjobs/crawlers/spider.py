@@ -27,11 +27,13 @@ class BaseSpider(object):
 
     @gen.coroutine
     def __worker(self):
+        """Consumes the queue."""
         while True:
             yield self.fetch_url()
 
     @gen.coroutine
     def crawl(self):
+        """Starts crawling the specified URL."""
         self.queue.put(self.URL)
         for _ in range(self.concurrency):
             self.__worker()
@@ -39,6 +41,7 @@ class BaseSpider(object):
 
     @gen.coroutine
     def fetch_url(self):
+        """Retrieves a URL from the queue and returns the parsed data."""
         url = yield self.queue.get()
         logger.info('fetching %s' % url)
         message = {'type': 'data', 'data': [], 'status': 'error'}
@@ -65,7 +68,22 @@ class BaseSpider(object):
 
     @gen.coroutine
     def fetch_links(self, response, soup):
+        """Fetch URLs to be added to the queue."""
         raise gen.Return([])
 
     def parse_response(self, response, soup):
+        """Extract information from the response, return should be a 
+        list of dict's.
+        
+        Sample dict:
+        {
+            'title': 'Job Title',
+            'company': 'Company Name',
+            'location': 'City/State/Country',
+            'tags': ['tag1', 'tag2', 'tag3'],
+            'category': 'Software Developer',
+            'origin': 'Name of the origin website',
+            'url': 'Link to the complete job description',
+        }
+        """
         raise NotImplementedError

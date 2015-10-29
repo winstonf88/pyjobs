@@ -6,11 +6,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class GithubCrawlwer(BaseSpider):
+class GithubCrawler(BaseSpider):
     URL = 'https://jobs.github.com/positions?description=python'
 
     @gen.coroutine
     def fetch_links(self, response, soup):
+        """Fetch next github page."""
         urls = []
         page = soup.find('a', {'class': 'js-paginate button'})
         if page:
@@ -20,6 +21,7 @@ class GithubCrawlwer(BaseSpider):
 
     @gen.coroutine
     def parse_response(self, response, soup):
+        """Extract job info from response."""
         jobs = soup.find('table', {'class': 'positionlist'})
         data = []
 

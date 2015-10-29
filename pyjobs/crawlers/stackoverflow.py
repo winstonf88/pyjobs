@@ -1,6 +1,7 @@
 from tornado import gen
 
 from pyjobs.crawlers.spider import BaseSpider
+from pyjobs.utils import URLParser
 
 import logging
 
@@ -8,7 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class StackOverflowCrawler(BaseSpider):
-    URL = 'http://careers.stackoverflow.com/jobs?searchTerm=python'
+    url_parser = URLParser(
+        url='http://careers.stackoverflow.com/jobs',
+        description='searchTerm'
+    )
 
     @gen.coroutine
     def fetch_links(self, response, soup):
@@ -19,7 +23,7 @@ class StackOverflowCrawler(BaseSpider):
                 links = links.findAll('a', {'class': 'job-link'})
                 links = links[1:-1]  # ignore current and last
                 for link in links:
-                    url = '%s%s' % (self.domain, link.attrs['href'])
+                    url = '%s%s' % (self.url_root, link.attrs['href'])
                     urls.append(url)
         raise gen.Return(urls)
 
@@ -30,7 +34,7 @@ class StackOverflowCrawler(BaseSpider):
         
         for node in jobs.findAll('div', {'class': '-job'}):
             title = node.find('a', {'class': 'job-link'})
-            url = '%s%s' % (self.domain, title.attrs['href'])
+            url = '%s%s' % (self.url_root, title.attrs['href'])
             company = node.find('strong', {'class': '-employer'}).text
             metadata = node.find('p', {'class': 'location'})
             location = metadata.text.split('\n')[2].strip()
@@ -47,7 +51,7 @@ class StackOverflowCrawler(BaseSpider):
                 'tags': tags,
                 'category': '',
                 'date': date,
-                'origin': 'careers.stackoverflow.com/',
+                'origin': self.url_parser.hostname,
                 'url': url,
             })
 

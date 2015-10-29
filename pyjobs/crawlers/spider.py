@@ -5,25 +5,31 @@ from tornado import gen
 from tornado import httpclient
 from tornado.queues import Queue
 
-from pyjobs.utils import json
-
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 class BaseSpider(object):
-    URL = ''
+    url_parser = None
 
-    def __init__(self, socket, concurrent=3):
-        if not self.URL:
-            raise ValueError('No URL')
-        url_parts = urlsplit(self.URL)
-        self.domain = '%s://%s' % (url_parts.scheme, url_parts.hostname)
-        self.socket = socket
+    def __init__(self, engine, concurrent=3):
+        self.engine = engine
         self.http = httpclient.AsyncHTTPClient()
         self.queue = Queue()
         self.concurrency = concurrent
+
+    @property
+    def hostname(self):
+        return self.url_parser.hostname
+
+    @property
+    def url_root(self):
+        return self.url_parser.url_root
+
+    @property
+    def base_url(self):
+        return self.url_parser.base_url
 
     @gen.coroutine
     def __worker(self):
@@ -32,19 +38,21 @@ class BaseSpider(object):
             yield self.fetch_url()
 
     @gen.coroutine
-    def crawl(self):
+    def crawl(self, description, location):
         """Starts crawling the specified URL."""
-        self.queue.put(self.URL)
+        url = self.url_parser(description, location)
+        self.queue.put(url)
+        self.engine.notify_started(self)
         for _ in range(self.concurrency):
             self.__worker()
         yield self.queue.join()
+        self.engine.notify_finished(self)
 
     @gen.coroutine
     def fetch_url(self):
         """Retrieves a URL from the queue and returns the parsed data."""
         url = yield self.queue.get()
         logger.info('fetching %s' % url)
-        message = {'type': 'data', 'data': [], 'status': 'error'}
         try:
             response = yield self.http.fetch(url)
             soup = BeautifulSoup(response.body)
@@ -57,13 +65,12 @@ class BaseSpider(object):
 
             data = yield self.parse_response(response, soup)
             logger.info('Parsed response for %s' % url)
-            message['data'] = data
-
-            message['status'] = 'success'
         except (httpclient.HTTPError, ValueError):
-            message['message'] = 'http error'
+            message = 'HTTP Error: (%s)' % url
+            self.engine.write_message(message, self.engine.STATUS_ERROR)
+        else:
+            self.engine.write_data(data)
         finally:
-            self.socket.write_message(message)
             self.queue.task_done()
 
     @gen.coroutine

@@ -2,7 +2,8 @@ import logging
 from tornado import gen
 from tornado import web
 from tornado import websocket
-from pyjobs.crawlers.consumer import crawl_jobs
+
+from pyjobs.engine import search
 from pyjobs.utils import json
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
         cmd = json.loads(message)
         if cmd['cmd'] == 'search':
             logger.info('cmd: search')
-            yield crawl_jobs(self)
+            yield search(self, cmd['params'])
 
     def on_close(self):
         logger.info('close connection')
@@ -27,6 +28,7 @@ class WebSocketHandler(websocket.WebSocketHandler):
     def write_message(self, message, binary=False):
         data = json.dumps(message)
         return super(WebSocketHandler, self).write_message(data, binary)
+
 
 class HomeHandler(web.RequestHandler):
 

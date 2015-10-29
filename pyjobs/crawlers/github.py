@@ -1,5 +1,7 @@
 from tornado import gen
+
 from pyjobs.crawlers.spider import BaseSpider
+from pyjobs.utils import URLParser
 
 import logging
 
@@ -7,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class GithubCrawler(BaseSpider):
-    URL = 'https://jobs.github.com/positions?description=python'
+    url_parser = URLParser(url='https://jobs.github.com/positions')
 
     @gen.coroutine
     def fetch_links(self, response, soup):
@@ -15,7 +17,7 @@ class GithubCrawler(BaseSpider):
         urls = []
         page = soup.find('a', {'class': 'js-paginate button'})
         if page:
-            url = '%s%s' % (self.domain, page.attrs['href'])
+            url = '%s%s' % (self.url_root, page.attrs['href'])
             urls.append(url)
         raise gen.Return(urls)
 
@@ -40,8 +42,8 @@ class GithubCrawler(BaseSpider):
                 'tags': [],
                 'category': '',
                 'date': date,
-                'origin': 'jobs.github.com',
-                'url': '%s%s' % (self.domain, title.attrs['href']),
+                'origin': self.url_parser.hostname,
+                'url': '%s%s' % (self.url_root, title.attrs['href']),
             })
 
         raise gen.Return(data)

@@ -8,27 +8,51 @@
     <link rel="stylesheet" href="/static/css/app.css" />
 </head>
 <body ng-controller="pyjobsMain">
+
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">
-                Python Jobs
-            </a>
+            <a class="navbar-brand" href="#">Python Jobs</a>
         </div>
+
         <div id="navbar" class="navbar-collapse collapse">
-            <form class="navbar-form navbar-right">
-                <span class="label" btn-con-status="status">
-                    <span ng-bind="status | conStatus"></span>
-                    <span ng-bind="(jobs|filter:text).length+'/'+jobs.length"></span>
-                </span>
-                <input type="text" class="form-control" placeholder="Pesquisar por..."
-                       ng-model="text" />
+            <form id="search" class="navbar-form navbar-right" ng-submit="status != 'searching' && search(search.searchTerm, search.location)">
+                <div class="form-group">
+                    <label class="label">
+                        Python
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Job description"
+                           ng-model="search.searchTerm" />
+                </div>
+
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Location"
+                           ng-model="search.location" />
+                </div>
+
+                <button class="btn btn-default" ng-disabled="status == 'searching'">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
             </form>
         </div>
     </div>
 </nav>
 
 <div class="container" style="margin-top:55px">
+    <form class="navbar-form navbar-right">
+        <span class="label" btn-con-status="status" ng-bind="status"></span>
+
+        <span class="badge">
+            Results:
+            <span ng-bind="(jobs|filter:text).length+'/'+jobs.length"></span>
+        </span>
+        <input type="text" class="form-control" placeholder="Filter results ..."
+               ng-model="text" />
+    </form>
+
     <div class="row">
         <div class="col-md-12">
             <ul class="list-group">

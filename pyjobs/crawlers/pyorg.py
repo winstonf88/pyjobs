@@ -1,5 +1,7 @@
 from tornado import gen
+
 from pyjobs.crawlers.spider import BaseSpider
+from pyjobs.utils import URLParser
 
 import logging
 
@@ -7,7 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 class PyORGCrawler(BaseSpider):
-    URL = 'https://www.python.org/jobs'
+    url_parser = URLParser(
+        url='https://www.python.org/jobs',
+        description=None,
+        location=None
+    )
 
     @gen.coroutine
     def fetch_links(self, response, soup):
@@ -17,7 +23,7 @@ class PyORGCrawler(BaseSpider):
             pagination = soup.find('ul', {'class': 'pagination menu'})
             pages = pagination.findAll('a')[1:-1]
             for page in pages:
-                url = '%s%s' % (self.URL, page.attrs['href'])
+                url = '%s%s' % (self.base_url, page.attrs['href'])
                 urls.append(url)
         raise gen.Return(urls)
 
@@ -29,7 +35,7 @@ class PyORGCrawler(BaseSpider):
 
         for node in jobs.findAll('li'):
             title = node.find('span', {'class': 'listing-company-name'})
-            url = '%s%s' % (self.domain, title.find('a').attrs['href'])
+            url = '%s%s' % (self.url_root, title.find('a').attrs['href'])
             title = title.text.split('\t')
             company = ' '.join(title[1:]).strip()
             title = title[0].strip()
@@ -50,7 +56,7 @@ class PyORGCrawler(BaseSpider):
                 'tags': tags,
                 'category': category,
                 'date': date,
-                'origin': 'python.org',
+                'origin': self.url_parser.hostname,
                 'url': url,
             })
 

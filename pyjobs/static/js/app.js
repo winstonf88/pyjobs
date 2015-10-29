@@ -2,19 +2,54 @@
     angular.module('pyjobs', [])
 
     .factory('$websocket', function(){
-        return function(){
-            return new WebSocket('ws://localhost:8888/ws');
-        };
-    })
+        var dummy = function(){};
 
-    .filter('conStatus', function(){
-        var conStatus = {
-            0: 'offline',
-            1: 'searching',
-            2: 'done'
-        };
-        return function(status){
-            return (conStatus[status] || '');
+        function Socket(options){
+            this.options = angular.extend(
+                {onmessage: dummy, onclose: dummy, onerror: dummy, onclose: dummy},
+                options
+            );
+            this.createConnection();
+        }
+        Socket.prototype = {
+            createConnection: function(){
+                if (!this.connection){
+                    var self = this;
+                    connection = new WebSocket('ws://localhost:8888/ws');
+                    connection.onopen = function(){ self.onopen(); };
+                    connection.onmessage = function(message){ self.onmessage(message); };
+                    connection.onclose = function(){ self.onclose(); };
+                    connection.onerror = function(){ self.onerror(); };
+                    this.connection = connection;
+                }
+            },
+            onopen: function(){
+                this.options.onopen();
+            },
+            onclose: function(){
+                this.connection = false;
+                this.options.onclose();
+                this.createConnection();
+            },
+            onerror: function(){
+                this.options.onerror();
+            },
+            onmessage: function(message){
+                var data = angular.fromJson(message.data);
+                this.options.onmessage(data);
+            },
+            send: function(command, params){
+                var query = angular.toJson({'cmd': command, 'params': params});
+                console.debug(query);
+                this.connection.send(query);
+
+            },
+            search: function(term, location){
+                this.send('search', {'description': term, 'location': location});
+            }
+        }
+        return function(options){
+            return new Socket(options);
         };
     })
 
@@ -24,12 +59,12 @@
             scope: {btnConStatus: '='},
             link: function($scope, $element){
                 var conStatus = {
-                    0: 'label-danger',
-                    1: 'label-warning',
-                    2: 'label-success'
+                    'offline': 'label-danger',
+                    'searching': 'label-warning',
+                    'done': 'label-success'
                 };
                 $scope.$watch('btnConStatus', function(newStatus, oldStatus){
-                    console.debug('status', newStatus, oldStatus);
+//                    console.debug('status', newStatus, oldStatus);
                     $element.removeClass(conStatus[oldStatus]);
                     $element.addClass(conStatus[newStatus]);
                 });
@@ -40,38 +75,27 @@
     .controller('pyjobsMain', ['$scope', '$timeout', '$websocket',
     function($scope, $timeout, $websocket){
         $scope.jobs = [];
-        $scope.status = 0;
+        $scope.status = 'offline';
 
-        var ws = $websocket();
-        ws.onopen = function onopen(){
-            console.debug('connection opened');
-            $timeout(function(){
-                $scope.status = 'connected';
-            }, 0);
-            ws.send(angular.toJson({'cmd': 'search'}));
+        var socketOptions = {
+            onmessage: function(message){
+                $timeout(function(){
+                    if (message.type == 'data')
+                        $scope.jobs = $scope.jobs.concat(message.data);
+                    else if(message.type == 'status')
+                        $scope.status = message.data;
+                }, 0);
+            },
+            onopen: function(){
+                if (!$scope.jobs.length)
+                    $scope.search();
+            }
         };
+        var websocket = new $websocket(socketOptions);
 
-//        ws.onclose = function(){
-//            console.debug('connection closed');
-//            $timeout(function(){ $scope.status = 0; }, 0);
-//        }
-
-        ws.onmessage = function(message){
-            var response = angular.fromJson(message.data);
-            $timeout(function(){
-                if (response.type == 'data')
-                    $scope.jobs = $scope.jobs.concat(response.data);
-                else if(response.type == 'status')
-                    $scope.status = response.data;
-
-                console.debug(response.data);
-            }, 0);
+        $scope.search = function(term, location){
+            $scope.jobs = [];
+            websocket.search(term, location);
         };
-
-        $scope.sendMessage = function(message){
-            console.debug(ws, message);
-            ws.send(message);
-        }
-
     }]);
 })();
